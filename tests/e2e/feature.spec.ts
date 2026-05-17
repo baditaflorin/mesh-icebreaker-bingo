@@ -17,7 +17,7 @@ test("A picks a square and marks it by scanning B's payload", async ({ browser, 
 
     await b.locator(".mesh-qrx-payload summary").click();
     const payload = (await b.locator(".mesh-qrx-payload code").textContent()) ?? "";
-    await a.getByPlaceholder("or paste a mesh:// payload").fill(payload);
+    await a.getByPlaceholder("or paste a payload (URL or mesh://)").fill(payload);
     await a.getByRole("button", { name: "use", exact: true }).click();
 
     await expect(a.locator(".bg-cell").nth(0)).toContainText("bob");
