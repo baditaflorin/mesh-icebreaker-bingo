@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   QRExchange,
   makeScanPayload,
+  usePerPeerValue,
   type MeshConfig,
   type YRoom,
 } from "@baditaflorin/mesh-common";
@@ -56,39 +57,26 @@ function Body({ room, config }: { room: YRoom; config: MeshConfig }) {
     () => localStorage.getItem(NAME_KEY(config.storagePrefix)) ?? "",
   );
   const [selected, setSelected] = useState<number | null>(null);
-  const [, rerender] = useState(0);
 
   useEffect(() => {
     if (name) localStorage.setItem(NAME_KEY(config.storagePrefix), name);
   }, [name, config.storagePrefix]);
 
-  useEffect(() => {
-    const boards = room.doc.getMap<Record<string, Mark>>("boards");
-    const names = room.doc.getMap<string>("names");
-    const cb = () => rerender((n) => n + 1);
-    boards.observe(cb);
-    names.observe(cb);
-    return () => {
-      boards.unobserve(cb);
-      names.unobserve(cb);
-    };
-  }, [room]);
-
-  const boards = room.doc.getMap<Record<string, Mark>>("boards");
-  const names = room.doc.getMap<string>("names");
+  const boards = usePerPeerValue<Record<string, Mark>>(room, "boards", {});
+  const names = usePerPeerValue<string>(room, "names", "");
 
   useEffect(() => {
-    if (name.trim()) names.set(room.peerId, name.trim());
+    if (name.trim()) names.setMy(name.trim());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name, room.peerId]);
 
-  const myBoard = boards.get(room.peerId) ?? {};
+  const myBoard = boards.my;
 
   const markSquare = (idx: number, peerId: string, peerName: string) => {
     if (peerId === room.peerId) return;
     const next: Record<string, Mark> = { ...myBoard };
     next[String(idx)] = { peerId, name: peerName, ts: Date.now() };
-    boards.set(room.peerId, next);
+    boards.setMy(next);
     setSelected(null);
   };
 
