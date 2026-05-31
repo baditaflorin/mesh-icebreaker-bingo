@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  Leaderboard,
   QRExchange,
   makeScanPayload,
   usePerPeerValue,
@@ -112,6 +113,23 @@ function Body({ room, config }: { room: YRoom; config: MeshConfig }) {
   const myLines = checkBingo(myBoard);
   const filled = Object.keys(myBoard).length + 1; // +1 for free center
 
+  // Room scoreboard — reads EVERY peer's synced board out of the shared "boards"
+  // Y.Map so the mesh-synced progress is visible to everyone, not just to the
+  // peer who marked a square. This is the cross-peer surface: when peer A marks
+  // a square, peer B's scoreboard reflects A's new count.
+  const scoreboard = boards.entries
+    .map(([peerId, board]) => {
+      const marked = Object.keys(board ?? {}).length + 1; // +1 free center
+      return {
+        id: peerId,
+        name: names.valueOf(peerId) ?? peerId.slice(0, 6),
+        score: marked,
+        sub: `${checkBingo(board ?? {})} bingo`,
+        isMe: peerId === room.peerId,
+      };
+    })
+    .sort((x, y) => y.score - x.score || (x.isMe ? -1 : 1));
+
   const myPayload = makeScanPayload(room.roomId, room.peerId, name.trim() || "anon");
 
   return (
@@ -168,6 +186,15 @@ function Body({ room, config }: { room: YRoom; config: MeshConfig }) {
         showLabel="your QR — show this when you match a prompt for someone"
         scanLabel={selected === null ? "pick a square first" : "scan the matcher"}
         onScan={(parsed) => onScan(parsed.peerId, parsed.extra ?? "anon")}
+      />
+
+      <Leaderboard
+        className="bg-scoreboard"
+        title="room scoreboard"
+        items={scoreboard}
+        highlightId={room.peerId}
+        emptyText="no one has marked a square yet"
+        formatScore={(s) => `${s}/25`}
       />
     </div>
   );

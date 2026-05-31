@@ -1,7 +1,7 @@
 # mesh-icebreaker-bingo
 
 [![pages](https://img.shields.io/badge/live-baditaflorin.github.io%2Fmesh-icebreaker-bingo-a3e635)](https://baditaflorin.github.io/mesh-icebreaker-bingo/)
-[![version](https://img.shields.io/badge/version-0.1.0-blue)](https://github.com/baditaflorin/mesh-icebreaker-bingo/blob/main/package.json)
+[![version](https://img.shields.io/badge/version-0.1.1-blue)](https://github.com/baditaflorin/mesh-icebreaker-bingo/blob/main/package.json)
 [![license](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 
 > Bingo board of conversation prompts — scan someone's QR after talking to mark a square
